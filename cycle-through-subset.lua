@@ -85,18 +85,31 @@ local function cycle_lang(kind, dir)
     ---Accepted languages
     local accepted_langs = langs[track_type]
 
-    ---Position of the currently selected track
-    local cur_idx = mp.get_property_native('current-tracks/' .. kind .. '/src-id', 0)
-
+    ---Id of the current selected track
+    local cur_id = mp.get_property_native('current-tracks/' .. kind .. '/id', 0)
+    
     ---List of all tracks, indexed starting from 1
     ---(We cannot cache this because the user may add subtitle tracks at runtime)
     local all_tracks = mp.get_property_native('track-list', {})
-
+    
     -- +1 to go up, -1 to go down
     local step = 1
     if dir == 'down' then
         step = -1
     end
+    
+    ---Position of the currently selected track
+    local cur_idx = 0
+    if cur_id > 0 then ---Find track idx - Maybe there is a better way?
+        for idx = 1, #all_tracks do
+            local t = all_tracks[idx]
+            if t.type == track_type and t.id == cur_id then
+                cur_idx = idx
+                break
+            end
+        end
+    end
+    
     local first = cur_idx + step
     local last = cur_idx + step * #all_tracks
 
